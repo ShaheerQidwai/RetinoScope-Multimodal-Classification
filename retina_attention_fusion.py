@@ -25,16 +25,27 @@ Training defaults: StandardScaler; **WeightedRandomSampler** (inverse-frequency)
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
+import matplotlib
+
+matplotlib.use("Agg")  # non-interactive backend; renders straight to file
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, classification_report, f1_score
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
@@ -103,13 +114,31 @@ def pair_by_class(
     return X_concat, y, np.arange(len(y))
 
 
+def load_checkpoint(path: str, map_location: str = "cpu"):
+    """
+    Load a checkpoint saved by ``run_training``. The original training script may
+    have been launched as ``__main__`` (so ``FusionConfig.__module__`` was pickled
+    as ``__main__``). When loading from a different module we have to alias
+    ``FusionConfig`` into ``__main__`` so the unpickler can resolve it.
+    """
+    import sys
+    import torch  # local import keeps top-level light for callers that need only constants
+
+    main_mod = sys.modules.get("__main__")
+    if main_mod is not None and not hasattr(main_mod, "FusionConfig"):
+        main_mod.FusionConfig = FusionConfig
+    try:
+        return torch.load(path, map_location=map_location, weights_only=False)
+    except TypeError:
+        return torch.load(path, map_location=map_location)
+
+
 @dataclass
 class FusionConfig:
     # Set from loaded data (e.g. 139+139); used for plotting / checkpoint metadata
     fundus_dim: int = 139
     oct_dim: int = 139
     num_classes: int = 7
-    hidden1: int = 64  # unused: first MLP width is derived from input_dim in run_training
     hidden2: int = 32
     dropout: float = 0.35
     lr: float = 3e-4
@@ -289,6 +318,102 @@ def plot_attention_diagnostics(
     plt.close(fig)
     print(f"Attention visualization saved to {out_path}")
     print(f"  Mean gate — Fundus block: {m_f:.4f} | OCT block: {m_o:.4f}")
+
+
+def plot_per_class_attention(
+    attention: np.ndarray,
+    y_true: np.ndarray,
+    fundus_dim: int,
+    oct_dim: int,
+    out_path: str,
+    class_names: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """
+    Per-class attention diagnostic. For each class:
+      - mean gate per feature (line plot, Fundus and OCT halves separated)
+      - aggregate Fundus vs OCT block mean (bar)
+
+    Returns a JSON-friendly dict ``{class_name: {fundus_mean, oct_mean}}`` to
+    persist alongside the plot — substantiates report claims like
+    "the gate prioritises OCT for Glaucoma".
+    """
+    assert attention.ndim == 2 and y_true.ndim == 1
+    d = fundus_dim + oct_dim
+    assert attention.shape[1] == d
+    classes = sorted(np.unique(y_true).tolist())
+    if class_names is None or len(class_names) <= max(classes):
+        class_names = [f"Class {c}" for c in range(max(classes) + 1)]
+
+    cols = min(3, len(classes))
+    rows = int(np.ceil(len(classes) / cols))
+    fig, axes = plt.subplots(rows, cols, figsize=(5.5 * cols, 3.2 * rows))
+    axes = np.atleast_1d(axes).ravel()
+
+    summary: Dict[str, Any] = {}
+    for ci, c in enumerate(classes):
+        mask = y_true == c
+        if not mask.any():
+            continue
+        sub = attention[mask]
+        mu = sub.mean(axis=0)
+        f_mean = float(mu[:fundus_dim].mean())
+        o_mean = float(mu[fundus_dim:].mean())
+        ax = axes[ci]
+        ax.plot(np.arange(d), mu, color="steelblue", linewidth=1.0)
+        ax.axvline(fundus_dim - 0.5, color="gray", linestyle="--", linewidth=1.0)
+        ax.set_xlim(-0.5, d - 0.5)
+        ax.set_ylim(0, 1.05)
+        ax.set_title(
+            f"{class_names[c]}  (n={int(mask.sum())})\nFundus μ={f_mean:.3f} | OCT μ={o_mean:.3f}",
+            fontsize=10,
+        )
+        ax.set_xlabel("feature index")
+        ax.set_ylabel("attention gate")
+        ax.grid(True, alpha=0.3)
+        summary[class_names[c]] = {
+            "fundus_mean_gate": f_mean,
+            "oct_mean_gate": o_mean,
+            "n_samples": int(mask.sum()),
+        }
+
+    for j in range(len(classes), len(axes)):
+        axes[j].axis("off")
+    fig.suptitle("Per-class attention gates (held-out test)", fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+    return summary
+
+
+def plot_confusion_matrix(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    out_path: str,
+    class_names: Optional[List[str]] = None,
+) -> None:
+    """Confusion matrix PNG for the held-out test set."""
+    n_cls = max(int(y_true.max()), int(y_pred.max())) + 1
+    if class_names is None or len(class_names) < n_cls:
+        class_names = [f"Class {i}" for i in range(n_cls)]
+    cm = confusion_matrix(y_true, y_pred, labels=list(range(n_cls)))
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        cbar=False,
+        xticklabels=class_names[:n_cls],
+        yticklabels=class_names[:n_cls],
+    )
+    plt.title("Confusion Matrix — Attention Mid-Level Fusion")
+    plt.ylabel("True")
+    plt.xlabel("Predicted")
+    plt.tight_layout()
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    plt.savefig(out_path, dpi=150)
+    plt.close()
 
 
 def weighted_cross_entropy_loss(
@@ -604,10 +729,7 @@ def run_training(
 
     # Held-out test set (separate Fundus/OCT test files): same sqrt weights from *training* labels
     if X_test is not None and y_test is not None and len(y_test) > 0:
-        try:
-            ckpt = torch.load(save_path, map_location=device, weights_only=False)
-        except TypeError:
-            ckpt = torch.load(save_path, map_location=device)
+        ckpt = load_checkpoint(save_path, map_location=str(device))
         model.load_state_dict(ckpt["model_state"])
         test_ds = PairedRadiomicsDataset(X_test, y_test)
         test_loader = DataLoader(test_ds, batch_size=cfg.batch_size, shuffle=False)
@@ -648,6 +770,182 @@ def run_training(
                 cfg.oct_dim,
                 attention_plot_path,
             )
+            # Per-class diagnostic (substantiates "gate prioritised OCT for class X")
+            per_class_path = os.path.splitext(attention_plot_path)[0] + "_per_class.png"
+            per_class_summary = plot_per_class_attention(
+                attention_test,
+                y_true,
+                cfg.fundus_dim,
+                cfg.oct_dim,
+                per_class_path,
+            )
+            print(f"Per-class attention plot saved to {per_class_path}")
+
+        # Confusion matrix for the DL test predictions
+        cm_path = os.path.splitext(save_path)[0] + "_test_confusion.png"
+        plot_confusion_matrix(y_true, y_pred, cm_path)
+        print(f"Confusion matrix saved to {cm_path}")
+
+        # Persist a machine-readable metrics summary (used by the report + dashboard)
+        metrics_path = os.path.splitext(save_path)[0] + "_test_metrics.json"
+        per_class_f1 = f1_score(
+            y_true, y_pred, labels=list(range(cfg.num_classes)),
+            average=None, zero_division=0,
+        )
+        mr_rare, mc_rare = mean_recall_rare_classes(y_true, y_pred, frac_max=0.02)
+        payload_metrics: Dict[str, Any] = {
+            "n_test": int(len(y_test)),
+            "loss": float(test_metrics["loss"]),
+            "accuracy": float(test_metrics["accuracy"]),
+            "balanced_accuracy": float(test_metrics["balanced_accuracy"]),
+            "macro_f1": float(test_metrics["macro_f1"]),
+            "per_class_f1": {int(c): float(s) for c, s in enumerate(per_class_f1)},
+            "support": {int(c): int((y_true == c).sum()) for c in range(cfg.num_classes)},
+            "rare_class_mean_recall": None if np.isnan(mr_rare) else float(mr_rare),
+            "rare_class_ids": mc_rare,
+            "best_val_macro_f1": float(best_f1),
+            "config": {
+                "fundus_dim": cfg.fundus_dim,
+                "oct_dim": cfg.oct_dim,
+                "num_classes": cfg.num_classes,
+                "use_focal_loss": cfg.use_focal_loss,
+                "focal_gamma": cfg.focal_gamma,
+                "use_balanced_sampler": cfg.use_balanced_sampler,
+                "use_standard_scaler": cfg.use_standard_scaler,
+                "epochs": cfg.epochs,
+                "batch_size": cfg.batch_size,
+                "lr": cfg.lr,
+                "seed": cfg.seed,
+            },
+        }
+        if attention_plot_path and attention_test.size > 0:
+            payload_metrics["mean_gate_fundus"] = float(
+                attention_test[:, : cfg.fundus_dim].mean()
+            )
+            payload_metrics["mean_gate_oct"] = float(
+                attention_test[:, cfg.fundus_dim :].mean()
+            )
+            payload_metrics["per_class_attention"] = per_class_summary
+        with open(metrics_path, "w") as f:
+            json.dump(payload_metrics, f, indent=2)
+        print(f"Test metrics JSON saved to {metrics_path}")
+
+
+def evaluate_checkpoint(
+    save_path: str,
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    attention_plot_path: Optional[str] = "fusion_attention_test.png",
+) -> None:
+    """
+    Inference-only mode: load a saved checkpoint and regenerate the held-out
+    test artefacts (attention plots, per-class plot, confusion matrix, metrics
+    JSON). No training. Useful when the report needs the new diagnostics
+    without paying the training cost again.
+    """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    ckpt = load_checkpoint(save_path, map_location=str(device))
+    cfg = ckpt["config"]
+    fundus_dim = int(getattr(cfg, "fundus_dim", 139))
+    oct_dim = int(getattr(cfg, "oct_dim", 139))
+    num_classes = int(getattr(cfg, "num_classes", 7))
+    d_in = fundus_dim + oct_dim
+
+    if X_test.shape[1] != d_in:
+        raise ValueError(
+            f"Checkpoint expects input_dim={d_in} (fundus {fundus_dim}+oct {oct_dim}); "
+            f"got X_test with {X_test.shape[1]} cols."
+        )
+
+    if "scaler_mean" in ckpt and "scaler_scale" in ckpt:
+        mean_ = ckpt["scaler_mean"].astype(np.float32)
+        scale_ = ckpt["scaler_scale"].astype(np.float32)
+        X_test = (X_test.astype(np.float32) - mean_) / scale_
+        print("  applied saved StandardScaler from checkpoint")
+
+    attn_hidden = max(64, min(256, d_in // 2))
+    mlp_hidden1 = max(64, min(128, d_in // 2))
+    model = RetinoScopeFusionNetwork(
+        input_dim=d_in,
+        num_classes=num_classes,
+        attn_hidden=attn_hidden,
+        mlp_hidden1=mlp_hidden1,
+        mlp_hidden2=int(getattr(cfg, "hidden2", 32)),
+        dropout=float(getattr(cfg, "dropout", 0.35)),
+    ).to(device)
+    model.load_state_dict(ckpt["model_state"])
+
+    cw_np = ckpt.get("class_weights")
+    if cw_np is None:
+        cw_np = np.ones(num_classes, dtype=np.float32)
+    class_weights = torch.tensor(np.asarray(cw_np, dtype=np.float32), dtype=torch.float32)
+
+    test_ds = PairedRadiomicsDataset(X_test, y_test)
+    test_loader = DataLoader(test_ds, batch_size=int(getattr(cfg, "batch_size", 64)), shuffle=False)
+    use_focal = bool(getattr(cfg, "use_focal_loss", False))
+    focal_gamma = float(getattr(cfg, "focal_gamma", 2.0))
+    test_metrics = evaluate(
+        model, test_loader, class_weights, device,
+        include_predictions=True, include_attention=True,
+        use_focal_for_loss=use_focal, focal_gamma=focal_gamma,
+    )
+    y_true = test_metrics.pop("y_true")
+    y_pred = test_metrics.pop("y_pred")
+    attention_test = test_metrics.pop("attention")
+
+    print("\n" + "=" * 60)
+    print("HELD-OUT TEST SET (eval-only)")
+    print("=" * 60)
+    print(
+        f"  n={len(y_test)} | loss={test_metrics['loss']:.4f} | "
+        f"accuracy={test_metrics['accuracy']:.4f} | "
+        f"balanced_accuracy={test_metrics['balanced_accuracy']:.4f} | "
+        f"macro_f1={test_metrics['macro_f1']:.4f}"
+    )
+    print("\n" + classification_report(y_true, y_pred, digits=4, zero_division=0))
+
+    per_class_summary: Optional[Dict[str, Any]] = None
+    if attention_plot_path and attention_test.size > 0:
+        plot_attention_diagnostics(attention_test, fundus_dim, oct_dim, attention_plot_path)
+        per_class_path = os.path.splitext(attention_plot_path)[0] + "_per_class.png"
+        per_class_summary = plot_per_class_attention(
+            attention_test, y_true, fundus_dim, oct_dim, per_class_path,
+        )
+        print(f"Per-class attention plot saved to {per_class_path}")
+
+    cm_path = os.path.splitext(save_path)[0] + "_test_confusion.png"
+    plot_confusion_matrix(y_true, y_pred, cm_path)
+    print(f"Confusion matrix saved to {cm_path}")
+
+    metrics_path = os.path.splitext(save_path)[0] + "_test_metrics.json"
+    per_class_f1 = f1_score(
+        y_true, y_pred, labels=list(range(num_classes)), average=None, zero_division=0,
+    )
+    mr_rare, mc_rare = mean_recall_rare_classes(y_true, y_pred, frac_max=0.02)
+    payload_metrics: Dict[str, Any] = {
+        "n_test": int(len(y_test)),
+        "loss": float(test_metrics["loss"]),
+        "accuracy": float(test_metrics["accuracy"]),
+        "balanced_accuracy": float(test_metrics["balanced_accuracy"]),
+        "macro_f1": float(test_metrics["macro_f1"]),
+        "per_class_f1": {int(c): float(s) for c, s in enumerate(per_class_f1)},
+        "support": {int(c): int((y_true == c).sum()) for c in range(num_classes)},
+        "rare_class_mean_recall": None if np.isnan(mr_rare) else float(mr_rare),
+        "rare_class_ids": mc_rare,
+        "config": {
+            "fundus_dim": fundus_dim, "oct_dim": oct_dim, "num_classes": num_classes,
+            "use_focal_loss": use_focal, "focal_gamma": focal_gamma,
+        },
+        "mode": "eval_only",
+    }
+    if attention_plot_path and attention_test.size > 0:
+        payload_metrics["mean_gate_fundus"] = float(attention_test[:, :fundus_dim].mean())
+        payload_metrics["mean_gate_oct"] = float(attention_test[:, fundus_dim:].mean())
+        if per_class_summary is not None:
+            payload_metrics["per_class_attention"] = per_class_summary
+    with open(metrics_path, "w") as f:
+        json.dump(payload_metrics, f, indent=2)
+    print(f"Test metrics JSON saved to {metrics_path}")
 
 
 def _load_paired_modalities(
@@ -739,6 +1037,27 @@ def main():
         default=15,
         help="Stop if val macro-F1 does not improve for N epochs (0 = disabled)",
     )
+    parser.add_argument(
+        "--seeds",
+        type=int,
+        nargs="+",
+        default=None,
+        help=(
+            "Optional list of random seeds for multi-seed evaluation, e.g. "
+            "--seeds 42 7 13 99 2024. When provided, the script trains one model "
+            "per seed (each writes a suffixed checkpoint), then aggregates "
+            "test metrics into <save>_seed_summary.json (mean ± std)."
+        ),
+    )
+    parser.add_argument(
+        "--eval_only",
+        action="store_true",
+        help=(
+            "Skip training; load the checkpoint at --save and re-run held-out "
+            "test evaluation only. Regenerates attention plots, per-class plot, "
+            "confusion matrix, and the metrics JSON without retraining."
+        ),
+    )
     args = parser.parse_args()
 
     print("Loading TRAIN features and building class-balanced pairs...")
@@ -750,29 +1069,6 @@ def main():
         "train",
     )
     print(f"Paired train pool: X={X_concat.shape}, y={y.shape}, classes={np.unique(y)}")
-
-    cfg = FusionConfig(
-        fundus_dim=fundus_dim,
-        oct_dim=oct_dim,
-        val_ratio=args.val_ratio,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        lr=args.lr,
-        use_standard_scaler=not args.no_scale,
-        grad_clip_norm=args.grad_clip,
-        use_balanced_sampler=not args.no_balanced_sampler,
-        use_focal_loss=not args.no_focal,
-        focal_gamma=args.focal_gamma,
-        early_stop_patience=args.early_stop,
-    )
-
-    X_tr, X_va, y_tr, y_va = train_test_split(
-        X_concat,
-        y,
-        test_size=cfg.val_ratio,
-        random_state=cfg.seed,
-        stratify=y,
-    )
 
     X_test: Optional[np.ndarray] = None
     y_test: Optional[np.ndarray] = None
@@ -808,20 +1104,114 @@ def main():
                 "Use --no_test to silence this, or extract features to these paths."
             )
 
-    print(f"\nTraining split: {X_tr.shape[0]} | Validation (from train): {X_va.shape[0]}")
     attn_path: Optional[str] = args.attention_plot.strip() or None
 
-    run_training(
-        X_tr,
-        y_tr,
-        X_va,
-        y_va,
-        cfg,
-        save_path=args.save,
-        X_test=X_test,
-        y_test=y_test,
-        attention_plot_path=attn_path,
+    if args.eval_only:
+        if X_test is None or y_test is None:
+            raise SystemExit(
+                "--eval_only requires the held-out test files to be present. "
+                "Check the --fundus_test/--oct_test paths."
+            )
+        if not os.path.isfile(args.save):
+            raise SystemExit(f"--eval_only: checkpoint not found at {args.save}")
+        print(f"\n[eval-only] reusing checkpoint {args.save}")
+        evaluate_checkpoint(
+            args.save,
+            X_test,
+            y_test,
+            attention_plot_path=attn_path,
+        )
+        return
+
+    seeds: List[int] = args.seeds if args.seeds else [42]
+    multi_seed = len(seeds) > 1
+    save_root, save_ext = os.path.splitext(args.save)
+    attn_root, attn_ext = (
+        os.path.splitext(attn_path) if attn_path else (None, None)
     )
+
+    seed_records: List[Dict[str, Any]] = []
+    for seed in seeds:
+        print("\n" + "#" * 70)
+        print(f"#  Training run with seed={seed}")
+        print("#" * 70)
+
+        cfg = FusionConfig(
+            fundus_dim=fundus_dim,
+            oct_dim=oct_dim,
+            val_ratio=args.val_ratio,
+            epochs=args.epochs,
+            batch_size=args.batch_size,
+            lr=args.lr,
+            use_standard_scaler=not args.no_scale,
+            grad_clip_norm=args.grad_clip,
+            use_balanced_sampler=not args.no_balanced_sampler,
+            use_focal_loss=not args.no_focal,
+            focal_gamma=args.focal_gamma,
+            early_stop_patience=args.early_stop,
+            seed=seed,
+        )
+        X_tr, X_va, y_tr, y_va = train_test_split(
+            X_concat,
+            y,
+            test_size=cfg.val_ratio,
+            random_state=cfg.seed,
+            stratify=y,
+        )
+        print(f"Training split: {X_tr.shape[0]} | Validation (from train): {X_va.shape[0]}")
+
+        if multi_seed:
+            run_save = f"{save_root}_seed{seed}{save_ext}"
+            run_attn = (
+                f"{attn_root}_seed{seed}{attn_ext}"
+                if attn_path is not None
+                else None
+            )
+        else:
+            run_save = args.save
+            run_attn = attn_path
+
+        run_training(
+            X_tr,
+            y_tr,
+            X_va,
+            y_va,
+            cfg,
+            save_path=run_save,
+            X_test=X_test,
+            y_test=y_test,
+            attention_plot_path=run_attn,
+        )
+
+        # Pick up the metrics JSON the run just wrote
+        metrics_file = os.path.splitext(run_save)[0] + "_test_metrics.json"
+        if multi_seed and os.path.isfile(metrics_file):
+            with open(metrics_file) as f:
+                seed_records.append({"seed": seed, **json.load(f)})
+
+    if multi_seed and seed_records:
+        keys = ["accuracy", "balanced_accuracy", "macro_f1"]
+        agg = {
+            k: {
+                "mean": float(np.mean([r[k] for r in seed_records])),
+                "std": float(np.std([r[k] for r in seed_records])),
+                "values": [float(r[k]) for r in seed_records],
+            }
+            for k in keys
+        }
+        summary_path = f"{save_root}_seed_summary.json"
+        with open(summary_path, "w") as f:
+            json.dump(
+                {"seeds": seeds, "aggregate": agg, "per_seed": seed_records},
+                f,
+                indent=2,
+            )
+        print("\n" + "=" * 70)
+        print("MULTI-SEED SUMMARY")
+        print("=" * 70)
+        for k, v in agg.items():
+            print(f"  {k:<20} mean={v['mean']:.4f}  std={v['std']:.4f}  vals={v['values']}")
+        print(f"\nWritten to {summary_path}")
 
 
 if __name__ == "__main__":

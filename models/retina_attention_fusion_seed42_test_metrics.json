@@ -1,0 +1,86 @@
+{
+  "n_test": 8550,
+  "loss": 0.08911138917307017,
+  "accuracy": 0.8239766081871345,
+  "balanced_accuracy": 0.8030255975265055,
+  "macro_f1": 0.737207872503781,
+  "per_class_f1": {
+    "0": 0.8737845923709798,
+    "1": 0.21621621621621623,
+    "2": 0.7493934142114385,
+    "3": 0.9655172413793104,
+    "4": 0.9743589743589743,
+    "5": 0.6689895470383276,
+    "6": 0.7121951219512195
+  },
+  "support": {
+    "0": 5708,
+    "1": 64,
+    "2": 2570,
+    "3": 15,
+    "4": 20,
+    "5": 98,
+    "6": 75
+  },
+  "rare_class_mean_recall": 0.7922517006802721,
+  "rare_class_ids": [
+    1,
+    3,
+    4,
+    5,
+    6
+  ],
+  "best_val_macro_f1": 0.8911312850144995,
+  "config": {
+    "fundus_dim": 139,
+    "oct_dim": 139,
+    "num_classes": 7,
+    "use_focal_loss": true,
+    "focal_gamma": 2.0,
+    "use_balanced_sampler": true,
+    "use_standard_scaler": true,
+    "epochs": 80,
+    "batch_size": 64,
+    "lr": 0.0003,
+    "seed": 42
+  },
+  "mean_gate_fundus": 0.3487212657928467,
+  "mean_gate_oct": 0.5735524296760559,
+  "per_class_attention": {
+    "Class 0": {
+      "fundus_mean_gate": 0.3520059287548065,
+      "oct_mean_gate": 0.5857382416725159,
+      "n_samples": 5708
+    },
+    "Class 1": {
+      "fundus_mean_gate": 0.343158483505249,
+      "oct_mean_gate": 0.5615364909172058,
+      "n_samples": 64
+    },
+    "Class 2": {
+      "fundus_mean_gate": 0.34018367528915405,
+      "oct_mean_gate": 0.550835132598877,
+      "n_samples": 2570
+    },
+    "Class 3": {
+      "fundus_mean_gate": 0.36843279004096985,
+      "oct_mean_gate": 0.6999146342277527,
+      "n_samples": 15
+    },
+    "Class 4": {
+      "fundus_mean_gate": 0.3941880762577057,
+      "oct_mean_gate": 0.5353861451148987,
+      "n_samples": 20
+    },
+    "Class 5": {
+      "fundus_mean_gate": 0.3652995526790619,
+      "oct_mean_gate": 0.4808833599090576,
+      "n_samples": 98
+    },
+    "Class 6": {
+      "fundus_mean_gate": 0.35832396149635315,
+      "oct_mean_gate": 0.5408633947372437,
+      "n_samples": 75
+    }
+  }
+}

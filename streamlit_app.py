@@ -5,6 +5,7 @@ Provides overview, results visualization, and interactive prediction interface.
 import streamlit as st
 import numpy as np
 import pickle
+import json
 import matplotlib.pyplot as plt
 import seaborn as sns
 from PIL import Image
@@ -43,6 +44,11 @@ st.markdown("""
 # Model paths
 FUNDUS_MODEL_PATH = 'models/best_model.pkl'
 OCT_MODEL_PATH = 'models/oct_best_model.pkl'
+DL_MODEL_PATH = 'models/retina_attention_fusion.pt'
+DL_METRICS_PATH = 'models/retina_attention_fusion_test_metrics.json'
+DL_ATTN_PER_CLASS_PLOT = 'fusion_attention_test_per_class.png'
+DL_ATTN_PLOT = 'fusion_attention_test.png'
+DL_CONFUSION_PLOT = 'models/retina_attention_fusion_test_confusion.png'
 
 # Class names (after excluding classes 2 and 5)
 CLASS_NAMES = {
@@ -140,6 +146,118 @@ def load_feature_extractor():
     """Load feature extractor (cached)."""
     from radiomics_extractor import RadiomicsExtractor
     return RadiomicsExtractor()
+
+
+@st.cache_resource
+def load_dl_model():
+    """Load the attention-fusion DL model and its StandardScaler (cached). Returns None if missing."""
+    if not os.path.exists(DL_MODEL_PATH):
+        return None
+    try:
+        from retina_attention_fusion import RetinoScopeFusionNetwork, load_checkpoint
+    except Exception as e:
+        st.warning(f"Could not import torch / fusion model: {e}")
+        return None
+
+    try:
+        ckpt = load_checkpoint(DL_MODEL_PATH, map_location='cpu')
+        cfg = ckpt['config']
+        fundus_dim = int(getattr(cfg, 'fundus_dim', 139))
+        oct_dim = int(getattr(cfg, 'oct_dim', 139))
+        num_classes = int(getattr(cfg, 'num_classes', 7))
+        d_in = fundus_dim + oct_dim
+        attn_hidden = max(64, min(256, d_in // 2))
+        mlp_hidden1 = max(64, min(128, d_in // 2))
+        model = RetinoScopeFusionNetwork(
+            input_dim=d_in,
+            num_classes=num_classes,
+            attn_hidden=attn_hidden,
+            mlp_hidden1=mlp_hidden1,
+            mlp_hidden2=int(getattr(cfg, 'hidden2', 32)),
+            dropout=float(getattr(cfg, 'dropout', 0.35)),
+        )
+        model.load_state_dict(ckpt['model_state'])
+        model.eval()
+        return {
+            'model': model,
+            'fundus_dim': fundus_dim,
+            'oct_dim': oct_dim,
+            'num_classes': num_classes,
+            'scaler_mean': ckpt.get('scaler_mean'),
+            'scaler_scale': ckpt.get('scaler_scale'),
+        }
+    except Exception as e:
+        st.warning(f"Could not load DL attention-fusion checkpoint: {e}")
+        return None
+
+
+@st.cache_data
+def load_dl_metrics():
+    """Load test metrics JSON written by retina_attention_fusion.py (if present)."""
+    if not os.path.exists(DL_METRICS_PATH):
+        return None
+    try:
+        with open(DL_METRICS_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def predict_dl_attention(
+    fundus_image,
+    oct_image,
+    dl_pkg,
+    extractor,
+    fundus_orig_names,
+    oct_orig_names,
+):
+    """Run the attention-fusion DL model on the (Fundus, OCT) image pair."""
+    if dl_pkg is None:
+        return None
+    import torch
+
+    f_features, _ = extract_features_from_image(fundus_image, extractor, fundus_orig_names)
+    o_features, _ = extract_features_from_image(oct_image, extractor, oct_orig_names)
+    if f_features is None or o_features is None:
+        return None
+
+    fundus_dim = dl_pkg['fundus_dim']
+    oct_dim = dl_pkg['oct_dim']
+
+    def _fit_dim(v, d, label):
+        if len(v) == d:
+            return v
+        if len(v) < d:
+            st.warning(f"[DL/{label}] padded {len(v)} -> {d} features with zeros")
+            return np.concatenate([v, np.zeros(d - len(v), dtype=v.dtype)])
+        st.warning(f"[DL/{label}] truncated {len(v)} -> {d} features")
+        return v[:d]
+
+    f_features = _fit_dim(f_features, fundus_dim, 'Fundus')
+    o_features = _fit_dim(o_features, oct_dim, 'OCT')
+
+    x = np.concatenate([f_features, o_features]).astype(np.float32).reshape(1, -1)
+    if dl_pkg.get('scaler_mean') is not None and dl_pkg.get('scaler_scale') is not None:
+        mean_ = np.asarray(dl_pkg['scaler_mean'], dtype=np.float32)
+        scale_ = np.asarray(dl_pkg['scaler_scale'], dtype=np.float32)
+        x = (x - mean_) / scale_
+
+    with torch.no_grad():
+        xb = torch.tensor(x, dtype=torch.float32)
+        logits, attn = dl_pkg['model'](xb)
+        proba = torch.softmax(logits, dim=1).cpu().numpy()[0]
+        attn_np = attn.cpu().numpy()[0]
+    pred = int(np.argmax(proba))
+    return {
+        'prediction': pred,
+        'probabilities': proba,
+        'class_name': CLASS_NAMES[pred] if pred < len(CLASS_NAMES) else f'Class {pred}',
+        'mean_gate_fundus': float(attn_np[:fundus_dim].mean()),
+        'mean_gate_oct': float(attn_np[fundus_dim:].mean()),
+        'attention': attn_np,
+        'fundus_dim': fundus_dim,
+        'oct_dim': oct_dim,
+    }
 
 def extract_features_from_image(image, extractor, expected_feature_names=None):
     """Extract features from a single image."""
@@ -278,17 +396,19 @@ def main():
         return
     
     extractor = load_feature_extractor()
-    
-    if page == "🏠 Overview":
-        show_overview(models)
-    elif page == "📊 Results":
-        show_results(models)
-    elif page == "🔮 Predictions":
-        show_predictions(models, extractor)
-    elif page == "ℹ️ About":
-        show_about(models)
+    dl_pkg = load_dl_model()
+    dl_metrics = load_dl_metrics()
 
-def show_overview(models):
+    if page == "🏠 Overview":
+        show_overview(models, dl_metrics)
+    elif page == "📊 Results":
+        show_results(models, dl_metrics)
+    elif page == "🔮 Predictions":
+        show_predictions(models, extractor, dl_pkg)
+    elif page == "ℹ️ About":
+        show_about(models, dl_metrics)
+
+def show_overview(models, dl_metrics=None):
     """Show project overview."""
     st.header("Project Overview")
     
@@ -323,7 +443,9 @@ def show_overview(models):
     st.divider()
     
     st.subheader("📈 Model Performance")
-    col1, col2, col3 = st.columns(3)
+    n_metric_cols = 4 if dl_metrics else 3
+    cols_perf = st.columns(n_metric_cols)
+    col1, col2, col3 = cols_perf[0], cols_perf[1], cols_perf[2]
     
     # Use test accuracy if available, otherwise fall back to CV score
     fundus_score = models.get('fundus_test_accuracy', 0)
@@ -361,7 +483,19 @@ def show_overview(models):
             delta="+1.52%",
             help="Weighted Late Fusion (40% Fundus / 60% OCT)"
         )
-    
+
+    if dl_metrics:
+        with cols_perf[3]:
+            st.metric(
+                "DL Attention Fusion (Macro-F1)",
+                f"{dl_metrics.get('macro_f1', 0.0):.4f}",
+                delta=f"acc={dl_metrics.get('accuracy', 0.0):.4f}",
+                help=(
+                    "Mid-Level Fusion network with sigmoid feature gating. "
+                    f"Reported on n={dl_metrics.get('n_test', 0)} held-out test pairs."
+                ),
+            )
+
     st.divider()
     
     st.subheader("📁 Dataset Information")
@@ -385,15 +519,67 @@ def show_overview(models):
         - Features: 139 → 50 (selected)
         """)
 
-def show_results(models):
+def show_results(models, dl_metrics=None):
     """Show detailed results and visualizations."""
     st.header("📊 Results & Performance")
-    
+
     # Load results if available
     results_file = 'fusion_results.png'
     if os.path.exists(results_file):
-        st.subheader("Confusion Matrix")
+        st.subheader("Late Fusion Confusion Matrix")
         st.image(results_file, width='stretch')
+
+    # DL attention fusion artefacts (written by retina_attention_fusion.py)
+    if dl_metrics:
+        st.subheader("🧠 DL Attention Fusion — Held-out Test Metrics")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Accuracy", f"{dl_metrics.get('accuracy', 0):.4f}")
+        c2.metric("Balanced Acc.", f"{dl_metrics.get('balanced_accuracy', 0):.4f}")
+        c3.metric("Macro-F1", f"{dl_metrics.get('macro_f1', 0):.4f}")
+        c4.metric("Test n", dl_metrics.get('n_test', 0))
+
+        if 'mean_gate_fundus' in dl_metrics and 'mean_gate_oct' in dl_metrics:
+            g1, g2 = st.columns(2)
+            g1.metric(
+                "Mean Attention — Fundus",
+                f"{dl_metrics['mean_gate_fundus']:.4f}",
+                help="Average gate value over the Fundus block of the attention output (test set)"
+            )
+            g2.metric(
+                "Mean Attention — OCT",
+                f"{dl_metrics['mean_gate_oct']:.4f}",
+                help="Higher means the gate emphasises this modality more"
+            )
+
+        per_class_f1 = dl_metrics.get('per_class_f1') or {}
+        if per_class_f1:
+            st.markdown("**Per-class F1 (DL attention fusion)**")
+            df_pcf1 = pd.DataFrame(
+                {
+                    'Class': [
+                        CLASS_NAMES[int(c)] if int(c) < len(CLASS_NAMES) else f'Class {c}'
+                        for c in per_class_f1.keys()
+                    ],
+                    'F1': list(per_class_f1.values()),
+                    'Support': [
+                        (dl_metrics.get('support') or {}).get(c, 0) for c in per_class_f1.keys()
+                    ],
+                }
+            )
+            st.dataframe(df_pcf1, hide_index=True, width='stretch')
+
+        # Show plots if they exist
+        if os.path.exists(DL_CONFUSION_PLOT):
+            st.markdown("**Confusion Matrix — Attention Fusion**")
+            st.image(DL_CONFUSION_PLOT, width='stretch')
+        if os.path.exists(DL_ATTN_PLOT):
+            st.markdown("**Mean Attention Gate (test set, all classes)**")
+            st.image(DL_ATTN_PLOT, width='stretch')
+        if os.path.exists(DL_ATTN_PER_CLASS_PLOT):
+            st.markdown("**Per-class Attention Gates**")
+            st.image(DL_ATTN_PER_CLASS_PLOT, width='stretch')
+
+        st.divider()
     
     # Model comparison
     st.subheader("Model Comparison")
@@ -480,7 +666,7 @@ def show_results(models):
     - Prevents overfitting to majority class
     """)
 
-def show_predictions(models, extractor):
+def show_predictions(models, extractor, dl_pkg=None):
     """Show prediction interface."""
     st.header("🔮 Image Classification")
     
@@ -681,7 +867,88 @@ def show_predictions(models, extractor):
                         else:
                             st.info(f"ℹ️ Models disagree: Fundus={CLASS_NAMES[results['fundus']['prediction']]}, OCT={CLASS_NAMES[results['oct']['prediction']]}")
 
-def show_about(models):
+                        # DL Attention Fusion (if checkpoint is available)
+                        if dl_pkg is not None:
+                            st.divider()
+                            st.subheader("🧠 DL Attention Fusion")
+                            dl_result = predict_dl_attention(
+                                fundus_image,
+                                oct_image,
+                                dl_pkg,
+                                extractor,
+                                models.get('fundus_original_feature_names'),
+                                models.get('oct_original_feature_names'),
+                            )
+                            if dl_result is not None:
+                                col_a, col_b = st.columns([1, 2])
+                                with col_a:
+                                    st.metric(
+                                        "DL Prediction",
+                                        dl_result['class_name'],
+                                        help=(
+                                            "Mid-Level Fusion network with attention gating "
+                                            "over a 278-D Fundus+OCT radiomics vector"
+                                        ),
+                                    )
+                                    st.metric(
+                                        "Mean Gate — Fundus",
+                                        f"{dl_result['mean_gate_fundus']:.3f}",
+                                    )
+                                    st.metric(
+                                        "Mean Gate — OCT",
+                                        f"{dl_result['mean_gate_oct']:.3f}",
+                                    )
+                                with col_b:
+                                    fig, ax = plt.subplots(figsize=(8, 4))
+                                    probs = dl_result['probabilities']
+                                    classes = [CLASS_NAMES[i] for i in range(len(probs))]
+                                    colors = [
+                                        'green' if i == dl_result['prediction'] else 'gray'
+                                        for i in range(len(probs))
+                                    ]
+                                    ax.barh(classes, probs, color=colors)
+                                    ax.set_xlim([0, 1])
+                                    ax.set_xlabel('Probability')
+                                    ax.set_title('DL Attention-Fusion Prediction Probabilities')
+                                    plt.tight_layout()
+                                    st.pyplot(fig)
+
+                                # Per-feature attention strip for this single sample
+                                fig2, ax2 = plt.subplots(figsize=(10, 2.4))
+                                attn = dl_result['attention']
+                                fdim = dl_result['fundus_dim']
+                                ax2.plot(np.arange(len(attn)), attn, color='steelblue', linewidth=1)
+                                ax2.axvline(fdim - 0.5, color='gray', linestyle='--', linewidth=1)
+                                ax2.set_xlim(-0.5, len(attn) - 0.5)
+                                ax2.set_ylim(0, 1.05)
+                                ax2.set_xlabel('feature index (Fundus | OCT)')
+                                ax2.set_ylabel('attention gate')
+                                ax2.set_title('Per-feature attention for this image pair')
+                                ax2.grid(True, alpha=0.3)
+                                plt.tight_layout()
+                                st.pyplot(fig2)
+
+                                # Cross-method comparison line
+                                ml_pred = np.argmax(fused_proba)
+                                if ml_pred == dl_result['prediction']:
+                                    st.success(
+                                        f"✅ Late Fusion (XGBoost) and DL Attention Fusion agree: "
+                                        f"{CLASS_NAMES[ml_pred]}"
+                                    )
+                                else:
+                                    st.info(
+                                        f"ℹ️ ML and DL pipelines disagree: "
+                                        f"Late Fusion={CLASS_NAMES[ml_pred]}, "
+                                        f"DL Attention={dl_result['class_name']}"
+                                    )
+                        else:
+                            st.caption(
+                                "💡 Train and save the DL attention-fusion model "
+                                "(`python retina_attention_fusion.py`) to enable a third "
+                                "fusion path here."
+                            )
+
+def show_about(models, dl_metrics=None):
     """Show about page."""
     st.header("ℹ️ About This Project")
     
@@ -738,6 +1005,27 @@ def show_about(models):
         if oct_cv > 0:
             oct_info += f"- CV F1-macro: {oct_cv:.4f}"
         st.info(oct_info)
+
+    if dl_metrics:
+        st.subheader("🧠 DL Attention-Fusion Model")
+        cfg = dl_metrics.get('config', {})
+        dl_info = (
+            f"- Input: {cfg.get('fundus_dim', '?')} (Fundus) + {cfg.get('oct_dim', '?')} (OCT) "
+            f"= {cfg.get('fundus_dim', 0) + cfg.get('oct_dim', 0)}-D radiomics vector\n"
+            f"- Classes: {cfg.get('num_classes', '?')}\n"
+            f"- Loss: {'Focal' if cfg.get('use_focal_loss') else 'Weighted CE'} "
+            f"(γ={cfg.get('focal_gamma', '-')})\n"
+            f"- Sampler: {'Inverse-frequency oversampling' if cfg.get('use_balanced_sampler') else 'Standard'}\n"
+            f"- Test Accuracy: {dl_metrics.get('accuracy', 0):.4f} | "
+            f"Macro-F1: {dl_metrics.get('macro_f1', 0):.4f} | "
+            f"Balanced Acc.: {dl_metrics.get('balanced_accuracy', 0):.4f}\n"
+        )
+        if 'mean_gate_fundus' in dl_metrics:
+            dl_info += (
+                f"- Mean attention gate — Fundus: {dl_metrics['mean_gate_fundus']:.4f} | "
+                f"OCT: {dl_metrics['mean_gate_oct']:.4f}"
+            )
+        st.info(dl_info)
 
 if __name__ == "__main__":
     main()

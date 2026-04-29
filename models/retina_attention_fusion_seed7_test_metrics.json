@@ -1,0 +1,86 @@
+{
+  "n_test": 8550,
+  "loss": 0.07358674137390148,
+  "accuracy": 0.8011695906432749,
+  "balanced_accuracy": 0.8031531038664885,
+  "macro_f1": 0.7437991656231135,
+  "per_class_f1": {
+    "0": 0.8516546215290985,
+    "1": 0.3,
+    "2": 0.7244675498909945,
+    "3": 0.9655172413793104,
+    "4": 0.95,
+    "5": 0.7084870848708487,
+    "6": 0.7064676616915423
+  },
+  "support": {
+    "0": 5708,
+    "1": 64,
+    "2": 2570,
+    "3": 15,
+    "4": 20,
+    "5": 98,
+    "6": 75
+  },
+  "rare_class_mean_recall": 0.7994183673469387,
+  "rare_class_ids": [
+    1,
+    3,
+    4,
+    5,
+    6
+  ],
+  "best_val_macro_f1": 0.9076876410004796,
+  "config": {
+    "fundus_dim": 139,
+    "oct_dim": 139,
+    "num_classes": 7,
+    "use_focal_loss": true,
+    "focal_gamma": 2.0,
+    "use_balanced_sampler": true,
+    "use_standard_scaler": true,
+    "epochs": 80,
+    "batch_size": 64,
+    "lr": 0.0003,
+    "seed": 7
+  },
+  "mean_gate_fundus": 0.36748215556144714,
+  "mean_gate_oct": 0.6079038381576538,
+  "per_class_attention": {
+    "Class 0": {
+      "fundus_mean_gate": 0.36958280205726624,
+      "oct_mean_gate": 0.6291664242744446,
+      "n_samples": 5708
+    },
+    "Class 1": {
+      "fundus_mean_gate": 0.34390315413475037,
+      "oct_mean_gate": 0.575332760810852,
+      "n_samples": 64
+    },
+    "Class 2": {
+      "fundus_mean_gate": 0.3621872365474701,
+      "oct_mean_gate": 0.5688420534133911,
+      "n_samples": 2570
+    },
+    "Class 3": {
+      "fundus_mean_gate": 0.37194374203681946,
+      "oct_mean_gate": 0.7745489478111267,
+      "n_samples": 15
+    },
+    "Class 4": {
+      "fundus_mean_gate": 0.46189841628074646,
+      "oct_mean_gate": 0.4676608145236969,
+      "n_samples": 20
+    },
+    "Class 5": {
+      "fundus_mean_gate": 0.3917727470397949,
+      "oct_mean_gate": 0.4793025553226471,
+      "n_samples": 98
+    },
+    "Class 6": {
+      "fundus_mean_gate": 0.351360559463501,
+      "oct_mean_gate": 0.5281757712364197,
+      "n_samples": 75
+    }
+  }
+}

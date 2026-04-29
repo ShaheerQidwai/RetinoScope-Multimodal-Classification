@@ -1,0 +1,86 @@
+{
+  "n_test": 8550,
+  "loss": 0.09765784916647034,
+  "accuracy": 0.7876023391812865,
+  "balanced_accuracy": 0.7752553818772768,
+  "macro_f1": 0.7029761383077882,
+  "per_class_f1": {
+    "0": 0.8442481275206453,
+    "1": 0.21686746987951808,
+    "2": 0.7089911916237328,
+    "3": 0.9655172413793104,
+    "4": 0.918918918918919,
+    "5": 0.6440677966101694,
+    "6": 0.6222222222222222
+  },
+  "support": {
+    "0": 5708,
+    "1": 64,
+    "2": 2570,
+    "3": 15,
+    "4": 20,
+    "5": 98,
+    "6": 75
+  },
+  "rare_class_mean_recall": 0.7653358843537414,
+  "rare_class_ids": [
+    1,
+    3,
+    4,
+    5,
+    6
+  ],
+  "best_val_macro_f1": 0.8717902822122953,
+  "config": {
+    "fundus_dim": 139,
+    "oct_dim": 139,
+    "num_classes": 7,
+    "use_focal_loss": true,
+    "focal_gamma": 2.0,
+    "use_balanced_sampler": true,
+    "use_standard_scaler": true,
+    "epochs": 80,
+    "batch_size": 64,
+    "lr": 0.0003,
+    "seed": 99
+  },
+  "mean_gate_fundus": 0.37466666102409363,
+  "mean_gate_oct": 0.5820862650871277,
+  "per_class_attention": {
+    "Class 0": {
+      "fundus_mean_gate": 0.3742763102054596,
+      "oct_mean_gate": 0.6016603112220764,
+      "n_samples": 5708
+    },
+    "Class 1": {
+      "fundus_mean_gate": 0.3983415365219116,
+      "oct_mean_gate": 0.5660219192504883,
+      "n_samples": 64
+    },
+    "Class 2": {
+      "fundus_mean_gate": 0.37099477648735046,
+      "oct_mean_gate": 0.5460853576660156,
+      "n_samples": 2570
+    },
+    "Class 3": {
+      "fundus_mean_gate": 0.4214104115962982,
+      "oct_mean_gate": 0.7061585187911987,
+      "n_samples": 15
+    },
+    "Class 4": {
+      "fundus_mean_gate": 0.46383699774742126,
+      "oct_mean_gate": 0.4874366521835327,
+      "n_samples": 20
+    },
+    "Class 5": {
+      "fundus_mean_gate": 0.41597938537597656,
+      "oct_mean_gate": 0.434050977230072,
+      "n_samples": 98
+    },
+    "Class 6": {
+      "fundus_mean_gate": 0.4228891134262085,
+      "oct_mean_gate": 0.533638060092926,
+      "n_samples": 75
+    }
+  }
+}

@@ -1,0 +1,481 @@
+{
+  "seeds": [
+    42,
+    7,
+    13,
+    99,
+    2024
+  ],
+  "aggregate": {
+    "accuracy": {
+      "mean": 0.8002807017543858,
+      "std": 0.012616538587451858,
+      "values": [
+        0.8239766081871345,
+        0.8011695906432749,
+        0.7953216374269005,
+        0.7876023391812865,
+        0.7933333333333333
+      ]
+    },
+    "balanced_accuracy": {
+      "mean": 0.7892116738199866,
+      "std": 0.011667402014124455,
+      "values": [
+        0.8030255975265055,
+        0.8031531038664885,
+        0.7806586238383756,
+        0.7752553818772768,
+        0.7839656619912863
+      ]
+    },
+    "macro_f1": {
+      "mean": 0.7241541247078749,
+      "std": 0.017449091268722794,
+      "values": [
+        0.737207872503781,
+        0.7437991656231135,
+        0.7033744956172444,
+        0.7029761383077882,
+        0.7334129514874476
+      ]
+    }
+  },
+  "per_seed": [
+    {
+      "seed": 42,
+      "n_test": 8550,
+      "loss": 0.08911138917307017,
+      "accuracy": 0.8239766081871345,
+      "balanced_accuracy": 0.8030255975265055,
+      "macro_f1": 0.737207872503781,
+      "per_class_f1": {
+        "0": 0.8737845923709798,
+        "1": 0.21621621621621623,
+        "2": 0.7493934142114385,
+        "3": 0.9655172413793104,
+        "4": 0.9743589743589743,
+        "5": 0.6689895470383276,
+        "6": 0.7121951219512195
+      },
+      "support": {
+        "0": 5708,
+        "1": 64,
+        "2": 2570,
+        "3": 15,
+        "4": 20,
+        "5": 98,
+        "6": 75
+      },
+      "rare_class_mean_recall": 0.7922517006802721,
+      "rare_class_ids": [
+        1,
+        3,
+        4,
+        5,
+        6
+      ],
+      "best_val_macro_f1": 0.8911312850144995,
+      "config": {
+        "fundus_dim": 139,
+        "oct_dim": 139,
+        "num_classes": 7,
+        "use_focal_loss": true,
+        "focal_gamma": 2.0,
+        "use_balanced_sampler": true,
+        "use_standard_scaler": true,
+        "epochs": 80,
+        "batch_size": 64,
+        "lr": 0.0003,
+        "seed": 42
+      },
+      "mean_gate_fundus": 0.3487212657928467,
+      "mean_gate_oct": 0.5735524296760559,
+      "per_class_attention": {
+        "Class 0": {
+          "fundus_mean_gate": 0.3520059287548065,
+          "oct_mean_gate": 0.5857382416725159,
+          "n_samples": 5708
+        },
+        "Class 1": {
+          "fundus_mean_gate": 0.343158483505249,
+          "oct_mean_gate": 0.5615364909172058,
+          "n_samples": 64
+        },
+        "Class 2": {
+          "fundus_mean_gate": 0.34018367528915405,
+          "oct_mean_gate": 0.550835132598877,
+          "n_samples": 2570
+        },
+        "Class 3": {
+          "fundus_mean_gate": 0.36843279004096985,
+          "oct_mean_gate": 0.6999146342277527,
+          "n_samples": 15
+        },
+        "Class 4": {
+          "fundus_mean_gate": 0.3941880762577057,
+          "oct_mean_gate": 0.5353861451148987,
+          "n_samples": 20
+        },
+        "Class 5": {
+          "fundus_mean_gate": 0.3652995526790619,
+          "oct_mean_gate": 0.4808833599090576,
+          "n_samples": 98
+        },
+        "Class 6": {
+          "fundus_mean_gate": 0.35832396149635315,
+          "oct_mean_gate": 0.5408633947372437,
+          "n_samples": 75
+        }
+      }
+    },
+    {
+      "seed": 7,
+      "n_test": 8550,
+      "loss": 0.07358674137390148,
+      "accuracy": 0.8011695906432749,
+      "balanced_accuracy": 0.8031531038664885,
+      "macro_f1": 0.7437991656231135,
+      "per_class_f1": {
+        "0": 0.8516546215290985,
+        "1": 0.3,
+        "2": 0.7244675498909945,
+        "3": 0.9655172413793104,
+        "4": 0.95,
+        "5": 0.7084870848708487,
+        "6": 0.7064676616915423
+      },
+      "support": {
+        "0": 5708,
+        "1": 64,
+        "2": 2570,
+        "3": 15,
+        "4": 20,
+        "5": 98,
+        "6": 75
+      },
+      "rare_class_mean_recall": 0.7994183673469387,
+      "rare_class_ids": [
+        1,
+        3,
+        4,
+        5,
+        6
+      ],
+      "best_val_macro_f1": 0.9076876410004796,
+      "config": {
+        "fundus_dim": 139,
+        "oct_dim": 139,
+        "num_classes": 7,
+        "use_focal_loss": true,
+        "focal_gamma": 2.0,
+        "use_balanced_sampler": true,
+        "use_standard_scaler": true,
+        "epochs": 80,
+        "batch_size": 64,
+        "lr": 0.0003,
+        "seed": 7
+      },
+      "mean_gate_fundus": 0.36748215556144714,
+      "mean_gate_oct": 0.6079038381576538,
+      "per_class_attention": {
+        "Class 0": {
+          "fundus_mean_gate": 0.36958280205726624,
+          "oct_mean_gate": 0.6291664242744446,
+          "n_samples": 5708
+        },
+        "Class 1": {
+          "fundus_mean_gate": 0.34390315413475037,
+          "oct_mean_gate": 0.575332760810852,
+          "n_samples": 64
+        },
+        "Class 2": {
+          "fundus_mean_gate": 0.3621872365474701,
+          "oct_mean_gate": 0.5688420534133911,
+          "n_samples": 2570
+        },
+        "Class 3": {
+          "fundus_mean_gate": 0.37194374203681946,
+          "oct_mean_gate": 0.7745489478111267,
+          "n_samples": 15
+        },
+        "Class 4": {
+          "fundus_mean_gate": 0.46189841628074646,
+          "oct_mean_gate": 0.4676608145236969,
+          "n_samples": 20
+        },
+        "Class 5": {
+          "fundus_mean_gate": 0.3917727470397949,
+          "oct_mean_gate": 0.4793025553226471,
+          "n_samples": 98
+        },
+        "Class 6": {
+          "fundus_mean_gate": 0.351360559463501,
+          "oct_mean_gate": 0.5281757712364197,
+          "n_samples": 75
+        }
+      }
+    },
+    {
+      "seed": 13,
+      "n_test": 8550,
+      "loss": 0.07881783823259393,
+      "accuracy": 0.7953216374269005,
+      "balanced_accuracy": 0.7806586238383756,
+      "macro_f1": 0.7033744956172444,
+      "per_class_f1": {
+        "0": 0.8567164179104477,
+        "1": 0.25316455696202533,
+        "2": 0.7027597117243803,
+        "3": 0.9655172413793104,
+        "4": 0.918918918918919,
+        "5": 0.6354515050167224,
+        "6": 0.5910931174089069
+      },
+      "support": {
+        "0": 5708,
+        "1": 64,
+        "2": 2570,
+        "3": 15,
+        "4": 20,
+        "5": 98,
+        "6": 75
+      },
+      "rare_class_mean_recall": 0.7764608843537415,
+      "rare_class_ids": [
+        1,
+        3,
+        4,
+        5,
+        6
+      ],
+      "best_val_macro_f1": 0.8904478383458047,
+      "config": {
+        "fundus_dim": 139,
+        "oct_dim": 139,
+        "num_classes": 7,
+        "use_focal_loss": true,
+        "focal_gamma": 2.0,
+        "use_balanced_sampler": true,
+        "use_standard_scaler": true,
+        "epochs": 80,
+        "batch_size": 64,
+        "lr": 0.0003,
+        "seed": 13
+      },
+      "mean_gate_fundus": 0.36537256836891174,
+      "mean_gate_oct": 0.6271892189979553,
+      "per_class_attention": {
+        "Class 0": {
+          "fundus_mean_gate": 0.3666106164455414,
+          "oct_mean_gate": 0.6426311731338501,
+          "n_samples": 5708
+        },
+        "Class 1": {
+          "fundus_mean_gate": 0.36335545778274536,
+          "oct_mean_gate": 0.5770354866981506,
+          "n_samples": 64
+        },
+        "Class 2": {
+          "fundus_mean_gate": 0.3598363995552063,
+          "oct_mean_gate": 0.5986976027488708,
+          "n_samples": 2570
+        },
+        "Class 3": {
+          "fundus_mean_gate": 0.42584002017974854,
+          "oct_mean_gate": 0.7803434729576111,
+          "n_samples": 15
+        },
+        "Class 4": {
+          "fundus_mean_gate": 0.4444504380226135,
+          "oct_mean_gate": 0.607810378074646,
+          "n_samples": 20
+        },
+        "Class 5": {
+          "fundus_mean_gate": 0.4031049907207489,
+          "oct_mean_gate": 0.5412503480911255,
+          "n_samples": 98
+        },
+        "Class 6": {
+          "fundus_mean_gate": 0.3800930976867676,
+          "oct_mean_gate": 0.5579811930656433,
+          "n_samples": 75
+        }
+      }
+    },
+    {
+      "seed": 99,
+      "n_test": 8550,
+      "loss": 0.09765784916647034,
+      "accuracy": 0.7876023391812865,
+      "balanced_accuracy": 0.7752553818772768,
+      "macro_f1": 0.7029761383077882,
+      "per_class_f1": {
+        "0": 0.8442481275206453,
+        "1": 0.21686746987951808,
+        "2": 0.7089911916237328,
+        "3": 0.9655172413793104,
+        "4": 0.918918918918919,
+        "5": 0.6440677966101694,
+        "6": 0.6222222222222222
+      },
+      "support": {
+        "0": 5708,
+        "1": 64,
+        "2": 2570,
+        "3": 15,
+        "4": 20,
+        "5": 98,
+        "6": 75
+      },
+      "rare_class_mean_recall": 0.7653358843537414,
+      "rare_class_ids": [
+        1,
+        3,
+        4,
+        5,
+        6
+      ],
+      "best_val_macro_f1": 0.8717902822122953,
+      "config": {
+        "fundus_dim": 139,
+        "oct_dim": 139,
+        "num_classes": 7,
+        "use_focal_loss": true,
+        "focal_gamma": 2.0,
+        "use_balanced_sampler": true,
+        "use_standard_scaler": true,
+        "epochs": 80,
+        "batch_size": 64,
+        "lr": 0.0003,
+        "seed": 99
+      },
+      "mean_gate_fundus": 0.37466666102409363,
+      "mean_gate_oct": 0.5820862650871277,
+      "per_class_attention": {
+        "Class 0": {
+          "fundus_mean_gate": 0.3742763102054596,
+          "oct_mean_gate": 0.6016603112220764,
+          "n_samples": 5708
+        },
+        "Class 1": {
+          "fundus_mean_gate": 0.3983415365219116,
+          "oct_mean_gate": 0.5660219192504883,
+          "n_samples": 64
+        },
+        "Class 2": {
+          "fundus_mean_gate": 0.37099477648735046,
+          "oct_mean_gate": 0.5460853576660156,
+          "n_samples": 2570
+        },
+        "Class 3": {
+          "fundus_mean_gate": 0.4214104115962982,
+          "oct_mean_gate": 0.7061585187911987,
+          "n_samples": 15
+        },
+        "Class 4": {
+          "fundus_mean_gate": 0.46383699774742126,
+          "oct_mean_gate": 0.4874366521835327,
+          "n_samples": 20
+        },
+        "Class 5": {
+          "fundus_mean_gate": 0.41597938537597656,
+          "oct_mean_gate": 0.434050977230072,
+          "n_samples": 98
+        },
+        "Class 6": {
+          "fundus_mean_gate": 0.4228891134262085,
+          "oct_mean_gate": 0.533638060092926,
+          "n_samples": 75
+        }
+      }
+    },
+    {
+      "seed": 2024,
+      "n_test": 8550,
+      "loss": 0.09603675409715776,
+      "accuracy": 0.7933333333333333,
+      "balanced_accuracy": 0.7839656619912863,
+      "macro_f1": 0.7334129514874476,
+      "per_class_f1": {
+        "0": 0.8450191570881226,
+        "1": 0.2962962962962963,
+        "2": 0.7165810833195295,
+        "3": 0.9285714285714286,
+        "4": 0.9473684210526315,
+        "5": 0.6836363636363636,
+        "6": 0.7164179104477612
+      },
+      "support": {
+        "0": 5708,
+        "1": 64,
+        "2": 2570,
+        "3": 15,
+        "4": 20,
+        "5": 98,
+        "6": 75
+      },
+      "rare_class_mean_recall": 0.7746700680272108,
+      "rare_class_ids": [
+        1,
+        3,
+        4,
+        5,
+        6
+      ],
+      "best_val_macro_f1": 0.8907829144232329,
+      "config": {
+        "fundus_dim": 139,
+        "oct_dim": 139,
+        "num_classes": 7,
+        "use_focal_loss": true,
+        "focal_gamma": 2.0,
+        "use_balanced_sampler": true,
+        "use_standard_scaler": true,
+        "epochs": 80,
+        "batch_size": 64,
+        "lr": 0.0003,
+        "seed": 2024
+      },
+      "mean_gate_fundus": 0.35288265347480774,
+      "mean_gate_oct": 0.5486966967582703,
+      "per_class_attention": {
+        "Class 0": {
+          "fundus_mean_gate": 0.3541630208492279,
+          "oct_mean_gate": 0.562109649181366,
+          "n_samples": 5708
+        },
+        "Class 1": {
+          "fundus_mean_gate": 0.36587557196617126,
+          "oct_mean_gate": 0.5433059930801392,
+          "n_samples": 64
+        },
+        "Class 2": {
+          "fundus_mean_gate": 0.34704312682151794,
+          "oct_mean_gate": 0.5235093832015991,
+          "n_samples": 2570
+        },
+        "Class 3": {
+          "fundus_mean_gate": 0.44680410623550415,
+          "oct_mean_gate": 0.6810444593429565,
+          "n_samples": 15
+        },
+        "Class 4": {
+          "fundus_mean_gate": 0.44380876421928406,
+          "oct_mean_gate": 0.490805983543396,
+          "n_samples": 20
+        },
+        "Class 5": {
+          "fundus_mean_gate": 0.3760788142681122,
+          "oct_mean_gate": 0.4507257342338562,
+          "n_samples": 98
+        },
+        "Class 6": {
+          "fundus_mean_gate": 0.3711179494857788,
+          "oct_mean_gate": 0.5125643610954285,
+          "n_samples": 75
+        }
+      }
+    }
+  ]
+}

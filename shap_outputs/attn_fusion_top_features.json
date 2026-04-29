@@ -1,0 +1,436 @@
+{
+  "Normal": [
+    {
+      "feature": "OCT[134]",
+      "mean_abs_shap": 0.822565770736497
+    },
+    {
+      "feature": "Fundus[2]",
+      "mean_abs_shap": 0.48579028719688677
+    },
+    {
+      "feature": "Fundus[29]",
+      "mean_abs_shap": 0.48412053672701255
+    },
+    {
+      "feature": "OCT[37]",
+      "mean_abs_shap": 0.45488664823657143
+    },
+    {
+      "feature": "OCT[102]",
+      "mean_abs_shap": 0.4468907675992363
+    },
+    {
+      "feature": "OCT[105]",
+      "mean_abs_shap": 0.40826533989675823
+    },
+    {
+      "feature": "OCT[101]",
+      "mean_abs_shap": 0.3910563046349203
+    },
+    {
+      "feature": "OCT[25]",
+      "mean_abs_shap": 0.3889307995205108
+    },
+    {
+      "feature": "OCT[106]",
+      "mean_abs_shap": 0.3629776003052042
+    },
+    {
+      "feature": "Fundus[21]",
+      "mean_abs_shap": 0.3621613597815844
+    },
+    {
+      "feature": "Fundus[9]",
+      "mean_abs_shap": 0.3456515844725112
+    },
+    {
+      "feature": "OCT[81]",
+      "mean_abs_shap": 0.3442894666925889
+    },
+    {
+      "feature": "OCT[10]",
+      "mean_abs_shap": 0.34108524633572945
+    },
+    {
+      "feature": "OCT[115]",
+      "mean_abs_shap": 0.3223174979792711
+    },
+    {
+      "feature": "OCT[82]",
+      "mean_abs_shap": 0.31778409909364813
+    }
+  ],
+  "Class 1": [
+    {
+      "feature": "OCT[134]",
+      "mean_abs_shap": 0.4710037371094123
+    },
+    {
+      "feature": "OCT[21]",
+      "mean_abs_shap": 0.38583814032271035
+    },
+    {
+      "feature": "Fundus[29]",
+      "mean_abs_shap": 0.38064610215069083
+    },
+    {
+      "feature": "OCT[133]",
+      "mean_abs_shap": 0.3228447330344261
+    },
+    {
+      "feature": "Fundus[128]",
+      "mean_abs_shap": 0.27891463179072534
+    },
+    {
+      "feature": "OCT[29]",
+      "mean_abs_shap": 0.27841586963056114
+    },
+    {
+      "feature": "Fundus[21]",
+      "mean_abs_shap": 0.27198069271886804
+    },
+    {
+      "feature": "OCT[10]",
+      "mean_abs_shap": 0.27153569177656467
+    },
+    {
+      "feature": "Fundus[62]",
+      "mean_abs_shap": 0.26559362158420263
+    },
+    {
+      "feature": "Fundus[2]",
+      "mean_abs_shap": 0.2643397204793439
+    },
+    {
+      "feature": "Fundus[27]",
+      "mean_abs_shap": 0.2565708771305838
+    },
+    {
+      "feature": "OCT[115]",
+      "mean_abs_shap": 0.2559745363103973
+    },
+    {
+      "feature": "OCT[131]",
+      "mean_abs_shap": 0.24289696037458897
+    },
+    {
+      "feature": "OCT[5]",
+      "mean_abs_shap": 0.23973280428546181
+    },
+    {
+      "feature": "OCT[112]",
+      "mean_abs_shap": 0.22536976678055604
+    }
+  ],
+  "Class 3": [
+    {
+      "feature": "OCT[134]",
+      "mean_abs_shap": 0.44304806962805876
+    },
+    {
+      "feature": "OCT[21]",
+      "mean_abs_shap": 0.37484078497850776
+    },
+    {
+      "feature": "Fundus[29]",
+      "mean_abs_shap": 0.3549594202218491
+    },
+    {
+      "feature": "Fundus[21]",
+      "mean_abs_shap": 0.29699088848794114
+    },
+    {
+      "feature": "OCT[29]",
+      "mean_abs_shap": 0.2945695290638464
+    },
+    {
+      "feature": "Fundus[128]",
+      "mean_abs_shap": 0.28959630695496824
+    },
+    {
+      "feature": "Fundus[2]",
+      "mean_abs_shap": 0.28704580459417334
+    },
+    {
+      "feature": "OCT[133]",
+      "mean_abs_shap": 0.284768755685398
+    },
+    {
+      "feature": "OCT[10]",
+      "mean_abs_shap": 0.2748865616878449
+    },
+    {
+      "feature": "OCT[5]",
+      "mean_abs_shap": 0.25798858243422
+    },
+    {
+      "feature": "Fundus[9]",
+      "mean_abs_shap": 0.2461827816188356
+    },
+    {
+      "feature": "OCT[115]",
+      "mean_abs_shap": 0.23854535158430928
+    },
+    {
+      "feature": "Fundus[62]",
+      "mean_abs_shap": 0.23709826125561326
+    },
+    {
+      "feature": "Fundus[133]",
+      "mean_abs_shap": 0.22775717296156575
+    },
+    {
+      "feature": "OCT[102]",
+      "mean_abs_shap": 0.22579475224763484
+    }
+  ],
+  "Class 4": [
+    {
+      "feature": "OCT[134]",
+      "mean_abs_shap": 0.49458938795285046
+    },
+    {
+      "feature": "Fundus[29]",
+      "mean_abs_shap": 0.42405648014319675
+    },
+    {
+      "feature": "OCT[10]",
+      "mean_abs_shap": 0.41288476945035063
+    },
+    {
+      "feature": "OCT[21]",
+      "mean_abs_shap": 0.36973904043096
+    },
+    {
+      "feature": "Fundus[2]",
+      "mean_abs_shap": 0.36510659736713547
+    },
+    {
+      "feature": "Fundus[21]",
+      "mean_abs_shap": 0.3454060294101819
+    },
+    {
+      "feature": "OCT[133]",
+      "mean_abs_shap": 0.3140544489035973
+    },
+    {
+      "feature": "OCT[29]",
+      "mean_abs_shap": 0.30678690864330643
+    },
+    {
+      "feature": "OCT[12]",
+      "mean_abs_shap": 0.2964831798460653
+    },
+    {
+      "feature": "OCT[115]",
+      "mean_abs_shap": 0.28972831626322715
+    },
+    {
+      "feature": "Fundus[62]",
+      "mean_abs_shap": 0.2845241249478234
+    },
+    {
+      "feature": "Fundus[128]",
+      "mean_abs_shap": 0.27605313470250364
+    },
+    {
+      "feature": "OCT[102]",
+      "mean_abs_shap": 0.2724706543356375
+    },
+    {
+      "feature": "OCT[105]",
+      "mean_abs_shap": 0.2627371673753318
+    },
+    {
+      "feature": "OCT[37]",
+      "mean_abs_shap": 0.26082152938292386
+    }
+  ],
+  "Class 6": [
+    {
+      "feature": "OCT[134]",
+      "mean_abs_shap": 0.7431410570386757
+    },
+    {
+      "feature": "Fundus[29]",
+      "mean_abs_shap": 0.5645771101623941
+    },
+    {
+      "feature": "Fundus[2]",
+      "mean_abs_shap": 0.5323246878721255
+    },
+    {
+      "feature": "OCT[21]",
+      "mean_abs_shap": 0.5260239402244747
+    },
+    {
+      "feature": "Fundus[21]",
+      "mean_abs_shap": 0.4884942635780489
+    },
+    {
+      "feature": "Fundus[133]",
+      "mean_abs_shap": 0.46603886206004236
+    },
+    {
+      "feature": "OCT[102]",
+      "mean_abs_shap": 0.4633105853213113
+    },
+    {
+      "feature": "Fundus[128]",
+      "mean_abs_shap": 0.4587354543261439
+    },
+    {
+      "feature": "OCT[10]",
+      "mean_abs_shap": 0.448682163805678
+    },
+    {
+      "feature": "OCT[37]",
+      "mean_abs_shap": 0.4391790986175578
+    },
+    {
+      "feature": "Fundus[9]",
+      "mean_abs_shap": 0.42716450903371445
+    },
+    {
+      "feature": "OCT[29]",
+      "mean_abs_shap": 0.40528619527080556
+    },
+    {
+      "feature": "OCT[12]",
+      "mean_abs_shap": 0.36111181429581296
+    },
+    {
+      "feature": "OCT[5]",
+      "mean_abs_shap": 0.3565384088293275
+    },
+    {
+      "feature": "Fundus[35]",
+      "mean_abs_shap": 0.3531146155988803
+    }
+  ],
+  "Class 7": [
+    {
+      "feature": "OCT[134]",
+      "mean_abs_shap": 0.6797931562895784
+    },
+    {
+      "feature": "OCT[37]",
+      "mean_abs_shap": 0.6178862673202559
+    },
+    {
+      "feature": "OCT[105]",
+      "mean_abs_shap": 0.6086082363187083
+    },
+    {
+      "feature": "Fundus[2]",
+      "mean_abs_shap": 0.5635006657378363
+    },
+    {
+      "feature": "OCT[102]",
+      "mean_abs_shap": 0.5322178113421129
+    },
+    {
+      "feature": "OCT[106]",
+      "mean_abs_shap": 0.5215679949341675
+    },
+    {
+      "feature": "OCT[101]",
+      "mean_abs_shap": 0.514205277366075
+    },
+    {
+      "feature": "OCT[25]",
+      "mean_abs_shap": 0.4753112468981108
+    },
+    {
+      "feature": "Fundus[29]",
+      "mean_abs_shap": 0.47434226485798264
+    },
+    {
+      "feature": "OCT[81]",
+      "mean_abs_shap": 0.46190542663302475
+    },
+    {
+      "feature": "OCT[33]",
+      "mean_abs_shap": 0.43322898338082905
+    },
+    {
+      "feature": "OCT[74]",
+      "mean_abs_shap": 0.4294671253247887
+    },
+    {
+      "feature": "OCT[15]",
+      "mean_abs_shap": 0.4284946480174543
+    },
+    {
+      "feature": "OCT[82]",
+      "mean_abs_shap": 0.4023215244202767
+    },
+    {
+      "feature": "Fundus[21]",
+      "mean_abs_shap": 0.38220718441896545
+    }
+  ],
+  "Class 8": [
+    {
+      "feature": "OCT[134]",
+      "mean_abs_shap": 1.284849182343536
+    },
+    {
+      "feature": "Fundus[2]",
+      "mean_abs_shap": 0.6120028565452231
+    },
+    {
+      "feature": "OCT[25]",
+      "mean_abs_shap": 0.6088998087035213
+    },
+    {
+      "feature": "OCT[105]",
+      "mean_abs_shap": 0.5673843493201878
+    },
+    {
+      "feature": "OCT[37]",
+      "mean_abs_shap": 0.5617710539816724
+    },
+    {
+      "feature": "Fundus[29]",
+      "mean_abs_shap": 0.5561100703648385
+    },
+    {
+      "feature": "OCT[102]",
+      "mean_abs_shap": 0.5481956949114197
+    },
+    {
+      "feature": "OCT[101]",
+      "mean_abs_shap": 0.5478211421003875
+    },
+    {
+      "feature": "OCT[15]",
+      "mean_abs_shap": 0.5358313441436733
+    },
+    {
+      "feature": "OCT[81]",
+      "mean_abs_shap": 0.5036945616386529
+    },
+    {
+      "feature": "OCT[106]",
+      "mean_abs_shap": 0.4546107761611413
+    },
+    {
+      "feature": "OCT[27]",
+      "mean_abs_shap": 0.44730130393017786
+    },
+    {
+      "feature": "OCT[10]",
+      "mean_abs_shap": 0.44335735868712994
+    },
+    {
+      "feature": "Fundus[21]",
+      "mean_abs_shap": 0.4187804817200934
+    },
+    {
+      "feature": "OCT[82]",
+      "mean_abs_shap": 0.4178263831276783
+    }
+  ]
+}

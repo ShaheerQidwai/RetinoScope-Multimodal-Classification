@@ -1,0 +1,436 @@
+{
+  "Normal": [
+    {
+      "feature": "gabor_f0.1_t0_std",
+      "mean_abs_shap": 0.6973855495452881
+    },
+    {
+      "feature": "lbp_entropy",
+      "mean_abs_shap": 0.21100065112113953
+    },
+    {
+      "feature": "gabor_f0.3_t45_std",
+      "mean_abs_shap": 0.2032766342163086
+    },
+    {
+      "feature": "gabor_f0.5_t90_std",
+      "mean_abs_shap": 0.1774546504020691
+    },
+    {
+      "feature": "gabor_f0.3_t135_std",
+      "mean_abs_shap": 0.15957197546958923
+    },
+    {
+      "feature": "sobel_max",
+      "mean_abs_shap": 0.15478073060512543
+    },
+    {
+      "feature": "gabor_f0.3_t0_std",
+      "mean_abs_shap": 0.13586953282356262
+    },
+    {
+      "feature": "gabor_f0.5_t0_std",
+      "mean_abs_shap": 0.13086353242397308
+    },
+    {
+      "feature": "sobel_std",
+      "mean_abs_shap": 0.1109457015991211
+    },
+    {
+      "feature": "sobel_mean",
+      "mean_abs_shap": 0.09824314713478088
+    },
+    {
+      "feature": "gabor_f0.5_t45_std",
+      "mean_abs_shap": 0.09232828766107559
+    },
+    {
+      "feature": "kurtosis",
+      "mean_abs_shap": 0.08367705345153809
+    },
+    {
+      "feature": "glcm_contrast_d3_a90",
+      "mean_abs_shap": 0.06692411750555038
+    },
+    {
+      "feature": "hist_mode",
+      "mean_abs_shap": 0.06546246260404587
+    },
+    {
+      "feature": "gabor_f0.1_t45_std",
+      "mean_abs_shap": 0.05991305410861969
+    }
+  ],
+  "Class 1": [
+    {
+      "feature": "lbp_entropy",
+      "mean_abs_shap": 1.7351927757263184
+    },
+    {
+      "feature": "p90",
+      "mean_abs_shap": 0.19065479934215546
+    },
+    {
+      "feature": "glcm_contrast_d3_a90",
+      "mean_abs_shap": 0.18260309100151062
+    },
+    {
+      "feature": "B_ratio",
+      "mean_abs_shap": 0.1569889485836029
+    },
+    {
+      "feature": "sobel_max",
+      "mean_abs_shap": 0.13340400159358978
+    },
+    {
+      "feature": "gabor_f0.3_t90_std",
+      "mean_abs_shap": 0.11262636631727219
+    },
+    {
+      "feature": "gabor_f0.1_t90_std",
+      "mean_abs_shap": 0.10978050529956818
+    },
+    {
+      "feature": "p75",
+      "mean_abs_shap": 0.09268292039632797
+    },
+    {
+      "feature": "sobel_mean",
+      "mean_abs_shap": 0.0717691034078598
+    },
+    {
+      "feature": "gabor_f0.3_t0_std",
+      "mean_abs_shap": 0.070703886449337
+    },
+    {
+      "feature": "largest_component_area",
+      "mean_abs_shap": 0.057605475187301636
+    },
+    {
+      "feature": "gabor_f0.1_t135_std",
+      "mean_abs_shap": 0.050567708909511566
+    },
+    {
+      "feature": "G_ratio",
+      "mean_abs_shap": 0.04257645457983017
+    },
+    {
+      "feature": "gabor_f0.5_t135_std",
+      "mean_abs_shap": 0.037758536636829376
+    },
+    {
+      "feature": "sobel_std",
+      "mean_abs_shap": 0.037574537098407745
+    }
+  ],
+  "Class 3": [
+    {
+      "feature": "gabor_f0.1_t0_std",
+      "mean_abs_shap": 0.5535043478012085
+    },
+    {
+      "feature": "gabor_f0.3_t135_std",
+      "mean_abs_shap": 0.21143391728401184
+    },
+    {
+      "feature": "gabor_f0.3_t0_std",
+      "mean_abs_shap": 0.197404146194458
+    },
+    {
+      "feature": "gabor_f0.3_t45_std",
+      "mean_abs_shap": 0.18846142292022705
+    },
+    {
+      "feature": "sobel_max",
+      "mean_abs_shap": 0.18711860477924347
+    },
+    {
+      "feature": "gabor_f0.5_t90_std",
+      "mean_abs_shap": 0.17394478619098663
+    },
+    {
+      "feature": "sobel_std",
+      "mean_abs_shap": 0.14590075612068176
+    },
+    {
+      "feature": "gabor_f0.5_t0_std",
+      "mean_abs_shap": 0.1233828142285347
+    },
+    {
+      "feature": "sobel_mean",
+      "mean_abs_shap": 0.11949506402015686
+    },
+    {
+      "feature": "lbp_entropy",
+      "mean_abs_shap": 0.09937698394060135
+    },
+    {
+      "feature": "B_ratio",
+      "mean_abs_shap": 0.09179419279098511
+    },
+    {
+      "feature": "gabor_f0.1_t45_std",
+      "mean_abs_shap": 0.08510781824588776
+    },
+    {
+      "feature": "freq_total_energy",
+      "mean_abs_shap": 0.07296036183834076
+    },
+    {
+      "feature": "gabor_f0.1_t135_std",
+      "mean_abs_shap": 0.07293987274169922
+    },
+    {
+      "feature": "glcm_contrast_d3_a90",
+      "mean_abs_shap": 0.06920643150806427
+    }
+  ],
+  "Class 4": [
+    {
+      "feature": "sobel_mean",
+      "mean_abs_shap": 0.4746551215648651
+    },
+    {
+      "feature": "lbp_mean",
+      "mean_abs_shap": 0.19646431505680084
+    },
+    {
+      "feature": "median",
+      "mean_abs_shap": 0.1959528923034668
+    },
+    {
+      "feature": "p25",
+      "mean_abs_shap": 0.08625739812850952
+    },
+    {
+      "feature": "lbp_std",
+      "mean_abs_shap": 0.0544162280857563
+    },
+    {
+      "feature": "B_std",
+      "mean_abs_shap": 0.02261127345263958
+    },
+    {
+      "feature": "glcm_correlation_d2_a90",
+      "mean_abs_shap": 0.01656285487115383
+    },
+    {
+      "feature": "laplacian_var",
+      "mean_abs_shap": 0.01329233217984438
+    },
+    {
+      "feature": "edge_density",
+      "mean_abs_shap": 0.012380735017359257
+    },
+    {
+      "feature": "gabor_f0.1_t135_std",
+      "mean_abs_shap": 0.011551136150956154
+    },
+    {
+      "feature": "lbp_entropy",
+      "mean_abs_shap": 0.005815296899527311
+    },
+    {
+      "feature": "p90",
+      "mean_abs_shap": 0.005078500136733055
+    },
+    {
+      "feature": "freq_total_energy",
+      "mean_abs_shap": 0.004525413271039724
+    },
+    {
+      "feature": "largest_component_area",
+      "mean_abs_shap": 0.004288163036108017
+    },
+    {
+      "feature": "lbp_uniformity",
+      "mean_abs_shap": 0.0037211845628917217
+    }
+  ],
+  "Class 6": [
+    {
+      "feature": "lbp_entropy",
+      "mean_abs_shap": 0.8259283304214478
+    },
+    {
+      "feature": "edge_density",
+      "mean_abs_shap": 0.394430011510849
+    },
+    {
+      "feature": "gabor_f0.3_t90_std",
+      "mean_abs_shap": 0.21392159163951874
+    },
+    {
+      "feature": "sobel_std",
+      "mean_abs_shap": 0.1944688856601715
+    },
+    {
+      "feature": "gabor_f0.5_t90_std",
+      "mean_abs_shap": 0.1378173679113388
+    },
+    {
+      "feature": "median",
+      "mean_abs_shap": 0.11887270212173462
+    },
+    {
+      "feature": "gabor_f0.1_t0_std",
+      "mean_abs_shap": 0.0939551293849945
+    },
+    {
+      "feature": "lbp_uniformity",
+      "mean_abs_shap": 0.08686217665672302
+    },
+    {
+      "feature": "gabor_f0.5_t45_std",
+      "mean_abs_shap": 0.05737851560115814
+    },
+    {
+      "feature": "gabor_f0.3_t135_std",
+      "mean_abs_shap": 0.05605335533618927
+    },
+    {
+      "feature": "skewness",
+      "mean_abs_shap": 0.045754071325063705
+    },
+    {
+      "feature": "gabor_f0.1_t45_std",
+      "mean_abs_shap": 0.04545225575566292
+    },
+    {
+      "feature": "gabor_f0.1_t135_std",
+      "mean_abs_shap": 0.04374245926737785
+    },
+    {
+      "feature": "iqr",
+      "mean_abs_shap": 0.03974665328860283
+    },
+    {
+      "feature": "gabor_f0.5_t0_std",
+      "mean_abs_shap": 0.039434418082237244
+    }
+  ],
+  "Class 7": [
+    {
+      "feature": "lbp_mean",
+      "mean_abs_shap": 0.978485107421875
+    },
+    {
+      "feature": "gabor_f0.3_t90_std",
+      "mean_abs_shap": 0.6498668789863586
+    },
+    {
+      "feature": "gabor_f0.1_t90_std",
+      "mean_abs_shap": 0.5955608487129211
+    },
+    {
+      "feature": "gabor_f0.1_t0_std",
+      "mean_abs_shap": 0.29273170232772827
+    },
+    {
+      "feature": "sobel_max",
+      "mean_abs_shap": 0.23713216185569763
+    },
+    {
+      "feature": "lbp_entropy",
+      "mean_abs_shap": 0.18839490413665771
+    },
+    {
+      "feature": "kurtosis",
+      "mean_abs_shap": 0.16216178238391876
+    },
+    {
+      "feature": "lbp_std",
+      "mean_abs_shap": 0.13058364391326904
+    },
+    {
+      "feature": "laplacian_var",
+      "mean_abs_shap": 0.10997916013002396
+    },
+    {
+      "feature": "glcm_correlation_d2_a90",
+      "mean_abs_shap": 0.10609888285398483
+    },
+    {
+      "feature": "gabor_f0.1_t45_std",
+      "mean_abs_shap": 0.09658411145210266
+    },
+    {
+      "feature": "var",
+      "mean_abs_shap": 0.08730589598417282
+    },
+    {
+      "feature": "largest_component_area",
+      "mean_abs_shap": 0.08251108229160309
+    },
+    {
+      "feature": "gabor_f0.1_t135_std",
+      "mean_abs_shap": 0.07601464539766312
+    },
+    {
+      "feature": "B_ratio",
+      "mean_abs_shap": 0.0690581277012825
+    }
+  ],
+  "Class 8": [
+    {
+      "feature": "lbp_entropy",
+      "mean_abs_shap": 1.0771434307098389
+    },
+    {
+      "feature": "B_ratio",
+      "mean_abs_shap": 0.7722150087356567
+    },
+    {
+      "feature": "gabor_f0.1_t135_std",
+      "mean_abs_shap": 0.20310133695602417
+    },
+    {
+      "feature": "p10",
+      "mean_abs_shap": 0.18304242193698883
+    },
+    {
+      "feature": "entropy",
+      "mean_abs_shap": 0.16067813336849213
+    },
+    {
+      "feature": "p90",
+      "mean_abs_shap": 0.15691079199314117
+    },
+    {
+      "feature": "sobel_std",
+      "mean_abs_shap": 0.15329483151435852
+    },
+    {
+      "feature": "gabor_f0.5_t90_std",
+      "mean_abs_shap": 0.14966405928134918
+    },
+    {
+      "feature": "gabor_f0.1_t90_std",
+      "mean_abs_shap": 0.13650643825531006
+    },
+    {
+      "feature": "kurtosis",
+      "mean_abs_shap": 0.09299268573522568
+    },
+    {
+      "feature": "sobel_max",
+      "mean_abs_shap": 0.08216830343008041
+    },
+    {
+      "feature": "G_ratio",
+      "mean_abs_shap": 0.06614691764116287
+    },
+    {
+      "feature": "hist_mode",
+      "mean_abs_shap": 0.0635642558336258
+    },
+    {
+      "feature": "gabor_f0.1_t45_std",
+      "mean_abs_shap": 0.05967920273542404
+    },
+    {
+      "feature": "largest_component_area",
+      "mean_abs_shap": 0.04967144504189491
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+approach,accuracy,balanced_accuracy,f1_macro,f1_weighted,n_test
+xgb_fundus_only,0.7055,0.4131,0.3744,0.7030,8550
+xgb_oct_only,0.8674,0.7285,0.7181,0.8660,8550
+late_fusion_weighted_avg,0.8842,0.7500,0.7286,0.8817,8550
+late_fusion_geometric,0.8892,0.7370,0.7699,0.8870,8550
+late_fusion_max,0.8830,0.7369,0.6990,0.8805,8550
+attention_mid_fusion_dl,0.8525,0.8065,0.7658,0.8528,8550
+hybrid_attention_xgb,0.8602,0.7551,0.7126,0.8595,8550
