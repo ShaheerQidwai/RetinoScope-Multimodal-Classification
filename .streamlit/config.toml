@@ -1,0 +1,14 @@
+[server]
+maxUploadSize = 50      # MB per uploaded image (fundus + OCT pair)
+headless = true         # required for Streamlit Cloud
+
+[theme]
+base = "light"
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false

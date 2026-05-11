@@ -183,18 +183,67 @@ The dataset contains paired Fundus and OCT images annotated with 9 raw class lab
 | 6 | 75 | Minority |
 
 Total **paired test samples: 8550** (after class-based pairing — see § 3.3).
+The training-side counterpart is described in § 3.2.
 
-### 3.2 Class-paired test construction
+### 3.2 Training class distribution and imbalance
+
+The training data is severely imbalanced and the two modalities have different supports per class. Three views below clarify exactly what each pipeline sees during training.
+
+**3.2.1 Per-modality training set after the 9 → 7 label remap.** This is what the ML XGBoost models train on (the per-modality classifiers are trained independently, so each sees its own column).
+
+| Model class | Raw label | Fundus train | %    | OCT train | %    |
+|---|---|---|---|---|---|
+| 0 (Normal) | 0 | 30,122 | 65.29 | 22,146 | 64.33 |
+| 1 | 1 | 1,251 | 2.71 | 173 | 0.50 |
+| 2 | 3 | 12,726 | 27.58 | 10,447 | 30.34 |
+| 3 | 4 | 740 | 1.60 | **35** | 0.10 |
+| 4 | 6 | 384 | 0.83 | 183 | 0.53 |
+| 5 | 7 | 393 | 0.85 | 795 | 2.31 |
+| 6 | 8 | 520 | 1.13 | 649 | 1.89 |
+| **Total** |  | **46,136** |  | **34,428** |  |
+
+**3.2.2 Paired training set (DL attention-fusion network).** For class `c`, pair count = `min(n_F(c), n_O(c))`:
+
+| Model class | Fundus avail. | OCT avail. | **Pairs used** | %    |
+|---|---|---|---|---|
+| 0 (Normal) | 30,122 | 22,146 | **22,146** | 65.33 |
+| 1 | 1,251 | 173 | **173** | 0.51 |
+| 2 | 12,726 | 10,447 | **10,447** | 30.82 |
+| 3 | 740 | 35 | **35** | 0.10 |
+| 4 | 384 | 183 | **183** | 0.54 |
+| 5 | 393 | 795 | **393** | 1.16 |
+| 6 | 520 | 649 | **520** | 1.53 |
+| **Total pairs** |  |  | **33,897** |  |
+
+The DL training set is therefore bottlenecked by OCT class 3 — only 35 paired samples for that disease.
+
+**3.2.3 Imbalance ratios (max-class : min-class).**
+
+| Pipeline | Training set | Ratio |
+|---|---|---|
+| ML — Fundus XGBoost | 46,136 single-modality samples | 30,122 / 384 ≈ **78.4 : 1** |
+| ML — OCT XGBoost | 34,428 single-modality samples | 22,146 / 35 ≈ **632.9 : 1** |
+| DL — Attention Mid-Level Fusion | 33,897 paired samples | 22,146 / 35 ≈ **632.9 : 1** |
+
+**Why this matters — direct cross-reference to the training recipe (§ 4.2).** A 632:1 ratio means that without intervention, ~99.84 % of the model's gradient signal would come from class 0, and the model would converge to "always predict Normal" — exactly what the **Fundus-only XGBoost** ends up doing (test accuracy 70.55 % but balanced accuracy only 41.31 %; § 6.1). The DL pipeline therefore layers three complementary corrections to fight this same 632:1 ratio:
+
+1. **Sqrt class weights** (`w_c = 1 / √n_c`, mean-normalised) — the loss for a class-3 sample is up-weighted by ~25× relative to a class-0 sample. The square-root form is deliberate — `1/n_c` would up-weight class 3 by 632× and destabilise the gradient.
+2. **WeightedRandomSampler** (inverse-frequency oversampling) — class 3's 35 training pairs are seen ~22 146/35 ≈ 633× more often per epoch than they would be under natural sampling, so the model effectively trains on a balanced distribution.
+3. **Focal loss** (γ = 2) — on top of (1) and (2), down-weights examples the model already classifies confidently, redirecting gradient toward the hard residual cases.
+
+The empirical confirmation that these three corrections work is the **rare-class mean recall of 0.78 ± 0.01 across 5 seeds** (§ 6.3) and the consistent **0.96–0.98 recall on class 5** despite only 393 paired training samples (§ 6.2). The remaining failure mode — class 1 recall stuck at 0.13–0.22 — is discussed in § 7.3 and is *not* explained by training-pair count (class 1 has 173 pairs, more than classes 3 or 4).
+
+### 3.3 Class-paired test construction
 
 Because patient-level pairing of Fundus and OCT is not available in the dataset, the project uses a **synthetic class-based pairing**: for each class `c`, select `min(n_F(c), n_O(c))` Fundus and OCT samples and concatenate the first `n` indices from each modality. This produces matched batches per class. The same pairing rule is applied for both training (33 897 pairs) and test (8550 pairs), and both pipelines (ML late fusion, DL mid-level fusion, hybrid) are evaluated on this same set so all comparisons in this report are like-for-like.
 
 **Limitation:** the synthetic pairing inflates absolute accuracy because the two modalities of a "fused" sample are not from the same patient. We address this honestly in § 7.
 
-### 3.3 Feature extraction
+### 3.4 Feature extraction
 
 Radiomics features are extracted by [feature_extractor_alternative.py](feature_extractor_alternative.py) with [radiomics_extractor.py](radiomics_extractor.py) — a `scikit-image` / `scipy` based fall-back for environments where the heavyweight PyRadiomics dependency is not installed. The extraction yields **139 features per image** for both modalities, comprising first-order statistics, GLCM/GLRLM textures, LBP histograms, Gabor responses, and FFT bands. Features are saved as `.npz` archives (with feature name vectors) under [features/](features/) for downstream use.
 
-### 3.4 Feature selection (ML pipeline only)
+### 3.5 Feature selection (ML pipeline only)
 
 For the ML pipeline, an ensemble feature selector ([feature_selector.py](feature_selector.py)) reduces 139 → 50 features by majority voting over three methods:
 

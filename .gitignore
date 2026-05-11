@@ -1,4 +1,15 @@
 /venv/
-# /models/
-# /features/
 /multieye_data/
+
+# Pre-extracted features (large NPZ files, re-generate with run_pipeline.py)
+/features/
+
+# Checkpoint artifacts from feature extraction
+*.checkpoint.npz
+
+# SHAP and benchmark outputs (re-generate with shap_analysis.py / benchmark_all.py)
+/shap_outputs/
+/benchmark_outputs/
+
+# OS artefacts
+.DS_Store
