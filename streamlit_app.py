@@ -61,6 +61,38 @@ CLASS_NAMES = {
     6: 'Class 8'
 }
 
+def load_feature_names(json_path, npz_path, modality, selector=None, fallback_count=139):
+    """Safely load feature names from JSON (primary) or NPZ (fallback)."""
+    # 1. Try JSON first (Cloud deployment)
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r') as f:
+                names = json.load(f)
+            st.success(f"✓ Loaded {len(names)} original {modality} feature names from JSON")
+            return names
+        except Exception as e:
+            st.warning(f"Could not load {modality} feature names from JSON: {e}")
+            
+    # 2. Try NPZ (Local fallback)
+    if os.path.exists(npz_path):
+        try:
+            feat_data = np.load(npz_path, allow_pickle=True)
+            if 'feature_names' in feat_data:
+                names = feat_data['feature_names'].tolist()
+                st.success(f"✓ Loaded {len(names)} original {modality} feature names from NPZ")
+                return names
+        except Exception as e:
+            st.warning(f"Could not load {modality} feature names from NPZ: {e}")
+            
+    # 3. Try to get from feature selector if it has feature_names stored
+    if selector is not None and hasattr(selector, 'feature_names'):
+        st.info(f"✓ Got {len(selector.feature_names)} {modality} feature names from selector")
+        return selector.feature_names
+        
+    # 4. Fallback to generic names if everything fails
+    st.warning(f"Using generic feature names for {modality}")
+    return [f"Feature {i}" for i in range(fallback_count)]
+
 @st.cache_resource
 def load_models():
     """Load Fundus and OCT models (cached)."""
@@ -77,43 +109,20 @@ def load_models():
         fundus_selector = fundus_data.get('feature_selector') if isinstance(fundus_data, dict) else None
         oct_selector = oct_data.get('feature_selector') if isinstance(oct_data, dict) else None
         
-        # Try to load original feature names from saved features files
-        # The selector expects features BEFORE selection (139 features)
-        fundus_original_features = None
-        oct_original_features = None
+        # Load feature names using the safe helper function
+        fundus_original_features = load_feature_names(
+            'features/train_features_names.json', 
+            'features/train_features.npz', 
+            'Fundus',
+            fundus_selector
+        )
         
-        # Method 1: Try to load from features file (before selection) - this is the source of truth
-        try:
-            fundus_features_file = 'features/train_features.npz'
-            if os.path.exists(fundus_features_file):
-                fundus_feat_data = np.load(fundus_features_file, allow_pickle=True)
-                if 'feature_names' in fundus_feat_data:
-                    fundus_original_features = fundus_feat_data['feature_names'].tolist()
-                    st.success(f"✓ Loaded {len(fundus_original_features)} original Fundus feature names from training data")
-        except Exception as e:
-            st.warning(f"Could not load Fundus original features from file: {e}")
-        
-        # Method 2: Try to get from feature selector if it has feature_names stored
-        if fundus_original_features is None and fundus_selector is not None:
-            if hasattr(fundus_selector, 'feature_names'):
-                fundus_original_features = fundus_selector.feature_names
-                st.info(f"✓ Got {len(fundus_original_features)} Fundus feature names from selector")
-        
-        try:
-            oct_features_file = 'features/oct_train_features.npz'
-            if os.path.exists(oct_features_file):
-                oct_feat_data = np.load(oct_features_file, allow_pickle=True)
-                if 'feature_names' in oct_feat_data:
-                    oct_original_features = oct_feat_data['feature_names'].tolist()
-                    st.success(f"✓ Loaded {len(oct_original_features)} original OCT feature names from training data")
-        except Exception as e:
-            st.warning(f"Could not load OCT original features from file: {e}")
-        
-        # Method 2: Try to get from feature selector if it has feature_names stored
-        if oct_original_features is None and oct_selector is not None:
-            if hasattr(oct_selector, 'feature_names'):
-                oct_original_features = oct_selector.feature_names
-                st.info(f"✓ Got {len(oct_original_features)} OCT feature names from selector")
+        oct_original_features = load_feature_names(
+            'features/oct_train_features_names.json', 
+            'features/oct_train_features.npz', 
+            'OCT',
+            oct_selector
+        )
         
         # Get test metrics if available
         fundus_test_metrics = fundus_data.get('test_metrics', {}) if isinstance(fundus_data, dict) else {}
